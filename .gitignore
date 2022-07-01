@@ -1,0 +1,10 @@
+input/
+segmentation_dataset/
+present_dataset/
+
+.env/
+env/
+venv/
+.venv/
+
+__pycache__
