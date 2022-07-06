@@ -9,8 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision.transforms import CenterCrop
-
-from constants import SEGMENTATION_DATASET_DIR
+from uwm.constants import SEGMENTATION_DATASET_DIR
 
 MAX_CPUS = 8
 GRADIENT_CLIP_VALUE = 0.1
@@ -221,7 +220,7 @@ def main(args):
     )
 
     trainer.fit(model, dataset)
-    torch.save(model.state_dict(), "segmentation_model.pt")
+    torch.save(model.state_dict(), "./models/segmentation_model.pt")
 
 
 if __name__ == "__main__":

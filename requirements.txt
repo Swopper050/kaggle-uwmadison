@@ -1,0 +1,13 @@
+--extra-index-url https://download.pytorch.org/whl/cu113
+
+
+pandas==1.4.3
+matplotlib==3.5.2
+torch==1.12.0
+torchvision==0.13.0
+pytorch_lightning==1.6.4
+
+
+black==22.6.0
+isort==5.10.1
+flake8==4.0.1
