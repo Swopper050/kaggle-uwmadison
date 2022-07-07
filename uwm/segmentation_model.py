@@ -1,7 +1,5 @@
-import argparse
 import logging
 import os
-import sys
 
 import pytorch_lightning as pl
 import torch
@@ -12,7 +10,10 @@ from torchvision.transforms import CenterCrop
 from uwm.constants import SEGMENTATION_DATASET_DIR
 
 MAX_CPUS = 8
+"""Maximum number of CPU cores to use for loading data examples. """
+
 GRADIENT_CLIP_VALUE = 0.1
+"""Clip gradients during training to this number to avoid large gradients. """
 
 
 class FileDataset(Dataset):
@@ -132,7 +133,7 @@ class SegmentationUNet(pl.LightningModule):
             output_idx = self.u_depth - i - 1
             x = up_layer(x, down_outputs[output_idx])
 
-        return self.conv_out(x)
+        return torch.sigmoid(self.conv_out(x))
 
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
@@ -203,37 +204,3 @@ class UNetUpPass(nn.Module):
 
         x = torch.cat([x2, x1], dim=1)
         return self.double_conv(x)
-
-
-def main(args):
-    dataset = SegmentationDataset(batch_size=args.batch_size)
-    model = SegmentationUNet(1, 3)
-
-    trainer = pl.Trainer(
-        gpus=-1,
-        auto_select_gpus=True,
-        enable_progress_bar=True,
-        enable_model_summary=True,
-        enable_checkpointing=False,
-        max_epochs=args.epochs,
-        logger=False,
-    )
-
-    trainer.fit(model, dataset)
-    torch.save(model.state_dict(), "./models/segmentation_model.pt")
-
-
-if __name__ == "__main__":
-    logging.getLogger("lightning").setLevel(logging.INFO)
-    logging.getLogger("skl2onnx").setLevel(logging.INFO)
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--batch-size", type=int, default=16)
-    parser.add_argument("--epochs", type=int, default=30)
-    args = parser.parse_args()
-    main(args)

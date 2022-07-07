@@ -1,4 +1,6 @@
-input/
+input/*/*
+!input/.gitkeep
+
 segmentation_dataset/
 present_dataset/
 
