@@ -9,7 +9,7 @@ from uwm.segmentation_model import SegmentationDataset, SegmentationUNet
 
 def main(args):
     dataset = SegmentationDataset(batch_size=args.batch_size)
-    model = SegmentationUNet(1, 3)
+    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=2)
 
     trainer = pl.Trainer(
         gpus=-1,

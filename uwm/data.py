@@ -23,10 +23,11 @@ def write_input_and_targets_from_sample(id, sample, i):
     large_bowel_mask = get_mask_from_rle(sample["large_bowel"], img.shape)
     small_bowel_mask = get_mask_from_rle(sample["small_bowel"], img.shape)
     stomach_mask = get_mask_from_rle(sample["stomach"], img.shape)
+    background_mask = (large_bowel_mask + small_bowel_mask + stomach_mask) == 0
     segmentation_target = np.stack(
-        [large_bowel_mask, small_bowel_mask, stomach_mask], axis=0
+        [large_bowel_mask, small_bowel_mask, stomach_mask, background_mask], axis=0
     )
-    present_target = segmentation_target.max(axis=1).max(axis=1)
+    present_target = segmentation_target.max(axis=1).max(axis=1)[:3]
 
     input_tensor = torch.from_numpy(img.reshape([1, *img.shape])).float()
     segmentation_target_tensor = torch.from_numpy(segmentation_target).float()

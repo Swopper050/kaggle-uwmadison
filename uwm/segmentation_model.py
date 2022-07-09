@@ -16,6 +16,16 @@ GRADIENT_CLIP_VALUE = 0.1
 """Clip gradients during training to this number to avoid large gradients. """
 
 
+def dice_loss(preds, targets):
+    smooth = 1.0
+
+    iflat = preds.view(-1)
+    tflat = targets.view(-1)
+    intersection = (iflat * tflat).sum()
+
+    return 1 - ((2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth))
+
+
 class FileDataset(Dataset):
     """
     Extended from the torch.utils.data.Dataset, this class can be used in combination
@@ -138,13 +148,17 @@ class SegmentationUNet(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
         predictions = self(inputs)
-        loss = F.cross_entropy(predictions, targets)
+        weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
+        loss = F.cross_entropy(predictions, targets, weights)
+        # loss = dice_loss(predictions, targets)
         return loss
 
     def validation_step(self, batch, batch_idx):
         inputs, targets = batch
         predictions = self(inputs)
-        loss = F.cross_entropy(predictions, targets)
+        weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
+        loss = F.cross_entropy(predictions, targets, weights)
+        # loss = dice_loss(predictions, targets)
         return loss
 
     def validation_epoch_end(self, validation_step_outputs):

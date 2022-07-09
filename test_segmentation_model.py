@@ -8,8 +8,8 @@ from uwm.visualization import plot_prediction
 
 def main(args):
     dataset = SegmentationDataset(batch_size=1)
-    model = SegmentationUNet(1, 3)
-    model.load_state_dict(torch.load("./segmentation_model.pt"))
+    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=2)
+    model.load_state_dict(torch.load("./models/segmentation_model.pt"))
 
     dataset.setup()
     for batch in dataset.train_dataloader():
