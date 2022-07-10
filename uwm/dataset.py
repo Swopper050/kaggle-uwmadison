@@ -36,7 +36,6 @@ class FileDataset(Dataset):
                 transforms.RandomPerspective(distortion_scale=0.5, p=0.3),
             ]
         )
-        self.transform = transforms.CenterCrop((266, 266))
 
     def __len__(self):
         """
