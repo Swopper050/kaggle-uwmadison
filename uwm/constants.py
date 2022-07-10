@@ -1,6 +1,7 @@
 import torch
 
-BASE_DIR = "./input/uw-madison-gi-tract-image-segmentation"
+DATA_DIR = "./input/uw-madison-gi-tract-image-segmentation"
+""" Directory where the dataset for image segmentation is stored. """
 """ Base directory where the data is. """
 
 SEGMENTATION_DATASET_DIR = "./segmentation_dataset"

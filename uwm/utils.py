@@ -2,7 +2,7 @@ import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
-from uwm.constants import BASE_DIR
+from uwm.constants import DATA_DIR
 
 
 def get_image_from_id(id):
@@ -16,7 +16,7 @@ def get_image_from_id(id):
     """
 
     case, day, _, slice_nr = id.split("_")
-    img_path = f"{BASE_DIR}/train/{case}/{case}_{day}/scans/slice_{slice_nr}_*.png"
+    img_path = f"{DATA_DIR}/train/{case}/{case}_{day}/scans/slice_{slice_nr}_*.png"
     paths = glob.glob(img_path)
 
     if len(paths) != 1:

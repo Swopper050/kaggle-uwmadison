@@ -4,12 +4,14 @@ import sys
 
 import pytorch_lightning as pl
 import torch
-from uwm.segmentation_model import SegmentationDataset, SegmentationUNet
+from uwm.dataset import SegmentationDatamodule
+from uwm.segmentation_model import SegmentationUNet
 
 
 def main(args):
-    dataset = SegmentationDataset(batch_size=args.batch_size)
-    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=2)
+    dataset = SegmentationDatamodule(batch_size=args.batch_size)
+    dataset.dataset[0]
+    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=3, start_channels=16)
 
     trainer = pl.Trainer(
         gpus=-1,
