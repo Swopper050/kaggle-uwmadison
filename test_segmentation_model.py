@@ -2,13 +2,14 @@ import argparse
 
 import torch
 import torch.nn.functional as F
-from uwm.segmentation_model import SegmentationDataset, SegmentationUNet
+from uwm.dataset import SegmentationDatamodule
+from uwm.segmentation_model import SegmentationUNet
 from uwm.visualization import plot_prediction
 
 
 def main(args):
-    dataset = SegmentationDataset(batch_size=1)
-    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=2)
+    dataset = SegmentationDatamodule(batch_size=1)
+    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=3, start_channels=16)
     model.load_state_dict(torch.load("./models/segmentation_model.pt"))
 
     dataset.setup()

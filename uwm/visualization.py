@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Rectangle
+from uwm.constants import PREDICTION_THRESHOLD
 from uwm.utils import get_image_from_id, get_mask_from_rle
 
 
@@ -68,10 +69,11 @@ def plot_prediction(img, target, pred, alpha=0.9):
     ax2.set_title("Image with true Mask")
     plot_masks(ax2, img, target[0], target[1], target[2])
 
-    pred = np.ma.masked_where(pred < 0.5, pred)
+    pred = np.ma.masked_where(pred < PREDICTION_THRESHOLD, pred)
     ax3.set_title("Image with predicted Mask")
     plot_masks(ax3, img, pred[0], pred[1], pred[2])
 
+    # Show background mask as a vague filter.
     ax3.imshow(pred[3], interpolation="none", alpha=0.4)
 
     plt.show()

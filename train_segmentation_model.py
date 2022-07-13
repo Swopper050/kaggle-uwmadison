@@ -10,12 +10,11 @@ from uwm.segmentation_model import SegmentationUNet
 
 def main(args):
     dataset = SegmentationDatamodule(batch_size=args.batch_size)
-    dataset.dataset[0]
-    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=3, start_channels=16)
+    model = SegmentationUNet(n_channels=1, n_classes=4, u_depth=4, start_channels=32)
 
     trainer = pl.Trainer(
-        gpus=-1,
-        auto_select_gpus=True,
+        devices="auto",
+        accelerator="auto",
         enable_progress_bar=True,
         enable_model_summary=True,
         enable_checkpointing=False,
@@ -38,6 +37,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--batch-size", type=int, default=16)
-    parser.add_argument("--epochs", type=int, default=30)
+    parser.add_argument("--epochs", type=int, default=10)
     args = parser.parse_args()
     main(args)

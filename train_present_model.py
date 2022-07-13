@@ -4,17 +4,18 @@ import sys
 
 import pytorch_lightning as pl
 import torch
-from uwm.present_model import PresentDataset, PresentPredictor
+from uwm.dataset import PresentDatamodule
+from uwm.present_model import PresentPredictor
 
 
 def main(args):
-    dataset = PresentDataset(batch_size=args.batch_size)
+    dataset = PresentDatamodule(batch_size=args.batch_size)
     model = PresentPredictor()
 
     trainer = pl.Trainer(
-        gpus=-1,
-        auto_select_gpus=True,
-        enable_progress_bar=False,
+        devices="auto",
+        accelerator="auto",
+        enable_progress_bar=True,
         enable_model_summary=False,
         enable_checkpointing=False,
         max_epochs=args.epochs,
@@ -22,7 +23,7 @@ def main(args):
     )
 
     trainer.fit(model, dataset)
-    torch.save(model.state_dict(), "present_model.pt")
+    torch.save(model.state_dict(), "./present_model.pt")
 
 
 if __name__ == "__main__":

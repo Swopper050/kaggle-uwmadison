@@ -9,9 +9,6 @@ import torch.nn.functional as F
 GRADIENT_CLIP_VALUE = 0.1
 """Clip gradients during training to this number to avoid large gradients. """
 
-PREDICTION_THRESHOLD = 0.5
-""" Probability predictions larger than this value will be predicted as true. """
-
 
 def get_dice_coefficient(preds, targets):
     """
@@ -118,6 +115,7 @@ class SegmentationUNet(pl.LightningModule):
 
         current_channels = start_channels
         self.inc = UNetDoubleConv(n_channels, current_channels)
+        self.softmax = nn.Softmax(dim=1)
 
         # Create the 'down-side layers' of the U
         for i in range(u_depth):
@@ -150,25 +148,26 @@ class SegmentationUNet(pl.LightningModule):
             output_idx = self.u_depth - i - 1
             x = up_layer(x, down_outputs[output_idx])
 
-        return torch.sigmoid(self.conv_out(x))
+        return self.softmax(self.conv_out(x))
 
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
         predictions = self(inputs)
-        # loss = dice_loss(predictions, targets)
-        weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
-        loss = F.cross_entropy(predictions, targets, weights)
+        loss = dice_loss(predictions, targets)
+        # weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
+        # loss = F.cross_entropy(predictions, targets, weights)
         return loss
 
     def validation_step(self, batch, batch_idx):
         inputs, targets = batch
         predictions = self(inputs)
-        # loss = dice_loss(predictions, targets).item()
-        weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
-        loss = F.cross_entropy(predictions, targets, weights).item()
+        loss = dice_loss(predictions, targets).item()
+        # weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
+        # loss = F.cross_entropy(predictions, targets, weights).item()
 
-        predictions[predictions > 0.5] = 1.0
-        predictions[predictions < 0.5] = 0.0
+        max_predictions, _ = torch.max(predictions, dim=1, keepdim=True)
+        predictions[predictions != max_predictions] = 0.0
+        predictions[predictions == max_predictions] = 1.0
         dice_coef = get_multiclass_dice_coefficient(predictions, targets).item()
         return {
             "val_loss": loss,
@@ -183,7 +182,8 @@ class SegmentationUNet(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
-        return optimizer
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.99)
+        return [optimizer], [scheduler]
 
 
 class UNetDoubleConv(nn.Module):
