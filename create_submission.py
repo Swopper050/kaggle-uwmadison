@@ -1,6 +1,5 @@
 import argparse
 import glob
-import logging
 import os
 
 import matplotlib.pyplot as plt
@@ -61,8 +60,6 @@ def get_image_paths():
 
 
 def main(args):
-    DEVICE = torch.device("cpu")
-
     present = PresentPredictor()
     present.load_state_dict(torch.load("./models/present_model.pt"))
     present.to(DEVICE)
@@ -106,7 +103,7 @@ def main(args):
             results.append({"id": id, "class": class_name, "predicted": rle_mask})
 
     df = pd.DataFrame.from_records(results)
-    logging.info(df.head())
+    print(df.head(10))
 
 
 if __name__ == "__main__":
