@@ -2,8 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Rectangle
-from uwm.constants import PREDICTION_THRESHOLD
 from uwm.utils import get_image_from_id, get_mask_from_rle
+
+np.set_printoptions(precision=2, suppress=False)
 
 
 def custom_cmap(rgb_color):
@@ -50,7 +51,7 @@ def plot_sample(sample):
     plt.show()
 
 
-def plot_prediction(img, target, pred, alpha=0.9):
+def plot_prediction(img, target, pred, present_pred="", alpha=0.9):
     """
     Plots the predictions of the model versus the targets. It plots three images, one
     if the original image, one if the target masks and one with the predicted masks.
@@ -59,7 +60,8 @@ def plot_prediction(img, target, pred, alpha=0.9):
     :param target: 3d np.ndarray with three channels representing the three target masks
     :param pred: 3d np.ndarray with three channels representing the three predicted masks
     """
-    _, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 10))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 10))
+    fig.suptitle(f"Class present probs: {present_pred}", fontsize=16)
 
     ax1.set_title("Original Image")
     ax1.imshow(img)
@@ -69,7 +71,7 @@ def plot_prediction(img, target, pred, alpha=0.9):
     ax2.set_title("Image with true Mask")
     plot_masks(ax2, img, target[0], target[1], target[2])
 
-    pred = np.ma.masked_where(pred < PREDICTION_THRESHOLD, pred)
+    pred = np.ma.masked_where(pred < 0.9, pred)
     ax3.set_title("Image with predicted Mask")
     plot_masks(ax3, img, pred[0], pred[1], pred[2])
 

@@ -32,7 +32,7 @@ def get_dice_coefficient(preds, targets):
     if total_preds == 0 and total_targets == 0:
         return 1.0
 
-    return (2 * (preds * targets).sum()) / (total_preds + total_targets)
+    return (2 * (preds * targets).sum()) / (total_preds + total_targets + 0.0001)
 
 
 def get_continuous_dice_coefficient(preds, targets):
@@ -58,7 +58,7 @@ def get_continuous_dice_coefficient(preds, targets):
 
     x = (preds * torch.sign(targets)).sum()
     c = intersection / x if x > 0 else 1
-    return (2 * intersection) / (c * total_preds + total_targets)
+    return (2 * intersection) / (c * total_preds + total_targets + 0.0001)
 
 
 def get_multiclass_dice_coefficient(preds, targets, continuous=False):
@@ -184,6 +184,13 @@ class SegmentationUNet(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.99)
         return [optimizer], [scheduler]
+
+    def predict_masks(self, img):
+        predicted_masks = self(img).cpu()
+        max_predictions, _ = torch.max(predicted_masks, dim=1, keepdim=True)
+        predicted_masks[predicted_masks != max_predictions] = 0.0
+        predicted_masks[predicted_masks == max_predictions] = 1.0
+        return predicted_masks.numpy()
 
 
 class UNetDoubleConv(nn.Module):

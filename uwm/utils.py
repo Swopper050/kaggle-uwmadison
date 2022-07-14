@@ -5,6 +5,22 @@ import numpy as np
 from uwm.constants import DATA_DIR
 
 
+def id_from_path(path):
+    """
+    Given a path to an image, extract the id from as we would encounter it in the
+    training dataframe. For example if the path is:
+    "../input/uw-madison-gi-tract-image-segmentation/train/case101/case101_day20/scans/slice_0001_266_266_1.50_1.50.png"
+    The ID will be: "case101_day20_slice_0001"
+
+    :param path: str, path to an image
+    :returns: id
+    """
+    path_parts = path.split("/")
+    image_name = path_parts[-1].split(".")[0]
+    slice_part = "_".join(image_name.split("_")[:2])
+    return f"{path_parts[-3]}_{slice_part}"
+
+
 def get_image_from_id(id):
     """
     Given an id string as found in the train dataframe, returns the image corresponding
@@ -54,3 +70,24 @@ def get_mask_from_rle(encoded_masks, img_shape):
         mask[start : start + length] = 1.0
 
     return mask.reshape(img_shape)
+
+
+def rle_encode_mask(mask):
+    """
+    Given a mask, encode it in Run-Length Encoding (RLE). In RLE format, the mask will
+    be a string that contains pairs of numbers. Every pair denotes the start index and
+    the number of pixels from that index that are part of the mask. For example, suppose
+    we have a mask like
+    [[0.0, 1.0, 1.0],
+     [1.0, 0.0, 0.0],
+     [0.0, 1.0, 1.0],]
+    The RLE encoded mask will be "1 3 7 2".
+
+    :param mask: 2D np.ndarray with 0 and 1 values
+    :returns: str with RLE encoded mask
+    """
+
+    pixels = mask.flatten()
+    runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
+    runs[1::2] -= runs[::2]
+    return " ".join(str(x) for x in runs)

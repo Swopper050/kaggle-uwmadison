@@ -3,7 +3,7 @@ import logging
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-import torchvision
+from torchvision.models import ResNet18_Weights, resnet18
 
 
 class PresentPredictor(pl.LightningModule):
@@ -15,22 +15,25 @@ class PresentPredictor(pl.LightningModule):
 
     def __init__(self):
         super().__init__()
-        self.model = torchvision.models.resnet18(pretrained=True)
+        self.model = resnet18(weights=ResNet18_Weights.DEFAULT)
         n_inputs_last_layer = self.model.fc.in_features
         self.model.fc = torch.nn.Sequential(
             torch.nn.Linear(n_inputs_last_layer, 3),
             torch.nn.Sigmoid(),
         )
 
+    def forward(self, x):
+        return self.model(x)
+
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
-        predictions = self.model(inputs)
+        predictions = self(inputs)
         loss = F.binary_cross_entropy(predictions, targets)
         return loss
 
     def validation_step(self, batch, batch_idx):
         inputs, targets = batch
-        soft_predictions = self.model(inputs)
+        soft_predictions = self(inputs)
         loss = F.binary_cross_entropy(soft_predictions, targets)
 
         accuracy, precision, recall = class_wise_metrics(

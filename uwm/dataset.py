@@ -126,13 +126,15 @@ class PresentFileDataset(Dataset):
     with a Dataloader to lazily load the dataset using files as examples.
     """
 
-    def __init__(self, dataset_dir, example_names):
+    def __init__(self):
         """
         :param dataset_dir: str, path to the folder with all examples
         :param example_names: list of str with all example names
         """
-        self.train = pd.read_csv(f"{DATA_DIR}/train.csv").pivot(
-            index="id", columns="class", values="segmentation"
+        self.train = (
+            pd.read_csv(f"{DATA_DIR}/train.csv")
+            .pivot(index="id", columns="class", values="segmentation")
+            .fillna("")
         )
         self.transform = transforms.Compose(
             [
@@ -164,10 +166,9 @@ class PresentFileDataset(Dataset):
         img = get_image_from_id(sample.name)
         input_tensor = torch.from_numpy(img.reshape([1, *img.shape])).float()
 
-        __import__("pdb").set_trace()
-        large_bowel_present = sample["large_bowel"] != ""
-        small_bowel_present = sample["small_bowel"] != ""
-        stomach_present = sample["stomach"] != ""
+        large_bowel_present = 0.0 if sample["large_bowel"] == "" else 1.0
+        small_bowel_present = 0.0 if sample["small_bowel"] == "" else 1.0
+        stomach_present = 0.0 if sample["stomach"] == "" else 1.0
         target_tensor = torch.tensor(
             [large_bowel_present, small_bowel_present, stomach_present],
         ).float()

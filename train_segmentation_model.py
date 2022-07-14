@@ -23,7 +23,7 @@ def main(args):
     )
 
     trainer.fit(model, dataset)
-    torch.save(model.state_dict(), "./models/segmentation_model.pt")
+    torch.save(model.to("cpu").state_dict(), "./models/segmentation_model.pt")
 
 
 if __name__ == "__main__":

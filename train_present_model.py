@@ -18,12 +18,13 @@ def main(args):
         enable_progress_bar=True,
         enable_model_summary=False,
         enable_checkpointing=False,
+        fast_dev_run=False,
         max_epochs=args.epochs,
         logger=False,
     )
 
     trainer.fit(model, dataset)
-    torch.save(model.state_dict(), "./present_model.pt")
+    torch.save(model.to("cpu").state_dict(), "./models/present_model.pt")
 
 
 if __name__ == "__main__":
