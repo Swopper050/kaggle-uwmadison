@@ -154,16 +154,12 @@ class SegmentationUNet(pl.LightningModule):
         inputs, targets = batch
         predictions = self(inputs)
         loss = dice_loss(predictions, targets)
-        # weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
-        # loss = F.cross_entropy(predictions, targets, weights)
         return loss
 
     def validation_step(self, batch, batch_idx):
         inputs, targets = batch
         predictions = self(inputs)
         loss = dice_loss(predictions, targets).item()
-        # weights = torch.tensor([1.0, 1.0, 1.0, 0.1], device=self.device)
-        # loss = F.cross_entropy(predictions, targets, weights).item()
 
         max_predictions, _ = torch.max(predictions, dim=1, keepdim=True)
         predictions[predictions != max_predictions] = 0.0
