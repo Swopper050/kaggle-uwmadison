@@ -1,7 +1,4 @@
-LINT_FILES = tests/ weareback/
-TEST_PATH = tests
-PYTEST = py.test $(TEST_PATH) --pythonwarnings=once
-PYTEST_ARGS_COV = --cov-report=term-missing --cov-report=html --cov=weareback
+LINT_FILES = *.py uwm/
 
 define echotask
 	@tput setaf 6
@@ -20,7 +17,6 @@ help:
 	$(call echotask,"flake8","lints code using flake8")
 	$(call echotask,"lint","lints all code using flake8 isort and black")
 	$(call echotask,"formatlint","formats and lints code using flake8 isort and black")
-	$(call echotask,"test","runs all tests")
 	@echo
 
 deps:
@@ -41,6 +37,3 @@ flake8:
 lint: flake8 formatcheck
 
 formatlint: format flake8
-
-test:
-	$(PYTEST) $(PYTEST_ARGS_COV)
